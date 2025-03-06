@@ -1,2 +1,2 @@
-# Destiny-Card
+# Destiny_Card
 Jeu de carte en teste
