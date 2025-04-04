@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ### IntelliJ IDEA ###
 out/
 !**/src/main/**/out/
@@ -27,3 +28,10 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+=======
+build/
+*.jar
+*.tar
+*.zip
+*.mp4
+>>>>>>> ProgressDev
