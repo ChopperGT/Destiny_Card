@@ -1,7 +1,5 @@
 package Code.Menu;
 
-import Code.Game.Player.GameState;
-import Code.Game.Player.GameStateManager;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -14,14 +12,17 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.scene.media.MediaPlayer;
 import javafx.geometry.Pos;
+import Code.Save.Appli.Appli_Save;
 
 public class Main_Menu_Option {
     private VBox mainMenu;
     private VBox optionsMenu;
+    private MediaPlayer mediaPlayer;
 
     // Déclarer resolutionBox et fullscreenCheckBox comme variables d'instance
     private ComboBox<String> resolutionBox;
     private CheckBox fullscreenCheckBox;
+    private Slider volumeSlider;
 
     // Constructeur
     public Main_Menu_Option(VBox mainMenu) {
@@ -30,16 +31,20 @@ public class Main_Menu_Option {
 
     // Méthode pour créer le menu des options
     public VBox createOptionMenu(Font customFont, Stage primaryStage, MediaPlayer mediaPlayer) {
+        this.mediaPlayer = mediaPlayer;
         optionsMenu = new VBox(20);
 
+        // Charger les paramètres sauvegardés
+        Appli_Save savedSettings = Appli_Save.loadSettings();
+        
         // Création du texte "Options"
         Text optionText = new Text("Options");
         optionText.setFont(customFont);
         optionText.setStyle("-fx-font-size: 30px; -fx-fill: black;");
 
         // Création du slider pour le volume sonore
-        Slider volumeSlider = new Slider(0, 1, mediaPlayer.getVolume());
-        Label volumeLabel = new Label("Volume: " + (int) (mediaPlayer.getVolume() * 100) + "%");
+        volumeSlider = new Slider(0, 1, savedSettings.getVolume());
+        Label volumeLabel = new Label("Volume: " + (int) (savedSettings.getVolume() * 100) + "%");
         volumeLabel.setFont(customFont);
         volumeLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: black;");
 
@@ -60,7 +65,7 @@ public class Main_Menu_Option {
         resolutionBox.setItems(FXCollections.observableArrayList(
                 "2560x1440", "1920x1080", "1600x900", "1280x720"
         ));
-        resolutionBox.setValue("1920x1080");
+        resolutionBox.setValue(savedSettings.getResolution());
 
         resolutionBox.setStyle("-fx-font-size: 18px; -fx-cursor: hand;");
         resolutionBox.setOnAction(event -> {
@@ -76,6 +81,7 @@ public class Main_Menu_Option {
         fullscreenCheckBox = new CheckBox("Plein écran");
         fullscreenCheckBox.setFont(customFont);
         fullscreenCheckBox.setStyle("-fx-font-size: 18px; -fx-text-fill: black;");
+        fullscreenCheckBox.setSelected(savedSettings.isFullscreen());
         fullscreenCheckBox.setOnAction(event -> {
             if (fullscreenCheckBox.isSelected()) {
                 primaryStage.setFullScreen(true);
@@ -87,37 +93,33 @@ public class Main_Menu_Option {
         // Bouton Sauvegarder
         Button saveButton = new Button("Sauvegarder");
         saveButton.setFont(customFont);
-        saveButton.setStyle("-fx-padding: 10px 20px; -fx-background-color: rgba(255,255,255,0); -fx-border-radius: 10px;");
+        saveButton.setStyle("-fx-padding: 10px 20px; -fx-background-color: rgba(255,255,255,0); -fx-border-radius: 10px; -fx-cursor: hand;");
         saveButton.setOnAction(event -> {
-            // Création de l'objet GameState avec des valeurs d'exemple
-            GameState gameState = new GameState(1, 0, "Joueur1"); // Remplace par des valeurs dynamiques si nécessaire
-            gameState.setVolume(mediaPlayer.getVolume());
-            gameState.setResolution(resolutionBox.getValue());
-            gameState.setFullscreen(fullscreenCheckBox.isSelected());
-
-            // Sauvegarde dans le fichier JSON
-            GameStateManager.saveGameState(gameState);
-            System.out.println("Paramètres sauvegardés !");
+            Appli_Save settings = new Appli_Save(
+                volumeSlider.getValue(),
+                resolutionBox.getValue(),
+                fullscreenCheckBox.isSelected()
+            );
+            Appli_Save.saveSettings(settings);
+            System.out.println("Paramètres sauvegardés avec succès !");
         });
 
         // Bouton Retour
         Button backButton = new Button("Retour");
         backButton.setFont(customFont);
-        backButton.setStyle("-fx-padding: 10px 20px; -fx-background-color: rgba(255,255,255,0); -fx-border-radius: 10px;");
+        backButton.setStyle("-fx-padding: 10px 20px; -fx-background-color: rgba(255,255,255,0); -fx-border-radius: 10px; -fx-cursor: hand;");
         backButton.setOnAction(event -> {
             optionsMenu.setVisible(false);
             mainMenu.setVisible(true);
         });
 
-        // Ajouter tous les éléments à la VBox
+        // Ajouter tous les éléments au optionsMenu
         optionsMenu.getChildren().addAll(optionText, volumeLabel, volumeSlider, resolutionLabel, resolutionBox, fullscreenCheckBox, saveButton, backButton);
-        optionsMenu.setAlignment(Pos.CENTER);
-        optionsMenu.setVisible(false);
+        optionsMenu.setStyle("-fx-alignment: center;");
 
         return optionsMenu;
     }
 
-    // Getters pour accéder à resolutionBox et fullscreenCheckBox
     public ComboBox<String> getResolutionBox() {
         return resolutionBox;
     }
